@@ -13,7 +13,7 @@ This guide will help you get started with the Traefik Path Parameter Headers plu
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/traefik-path-param-headers.git
+git clone https://github.com/sistemica/traefik-path-param-headers.git
 cd traefik-path-param-headers
 ```
 
@@ -42,7 +42,7 @@ Add the plugin to your Traefik static configuration:
 # traefik.yml
 plugins:
   pathparamheaders:
-    moduleName: "github.com/yourusername/traefik-path-param-headers"
+    moduleName: "github.com/sistemica/traefik-path-param-headers"
     version: "v1.0.0"
 ```
 

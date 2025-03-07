@@ -9,7 +9,7 @@ services:
       - "8080:8080"  # Dashboard
     volumes:
       - ./traefik:/etc/traefik
-      - ../../:/plugins-local/src/github.com/yourusername/traefik-path-param-headers  # Mount plugin source
+      - ../../:/plugins-local/src/github.com/sistemica/traefik-path-param-headers  # Mount plugin source
     depends_on:
       - backend
     networks:

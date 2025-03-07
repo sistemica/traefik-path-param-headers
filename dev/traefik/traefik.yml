@@ -21,4 +21,4 @@ providers:
     dev:
       # Path to the plugin source code in the container
       goPath: /plugins-local
-      moduleName: github.com/yourusername/traefik-path-param-headers
+      moduleName: github.com/sistemica/traefik-path-param-headers

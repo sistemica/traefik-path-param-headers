@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/yourusername/traefik-path-param-headers"
+	"github.com/sistemica/traefik-path-param-headers"
 )
 
 func TestPathParamHeaders(t *testing.T) {
