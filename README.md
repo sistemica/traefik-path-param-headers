@@ -1,111 +1,106 @@
-# Quick Start Guide
+# Path Parameter Headers Plugin for Traefik v3
 
-This guide will help you get started with the Traefik Path Parameter Headers plugin quickly.
+This middleware plugin extracts path parameters from URLs based on a pattern and adds them as HTTP headers to the request.
 
-## Prerequisites
+## Features
 
-- Docker and Docker Compose
-- Go 1.18 or later (for development)
-- Git
+- Extracts path parameters based on a pattern (e.g., `/products/{category}/{id}`)
+- Adds each parameter as an HTTP header
+- Customizable header prefix
+
+## Example
+
+With the configuration below, if a request is made to `/products/electronics/12345`, the plugin will add the following headers to the request:
+
+- `X-Path-Category: electronics`
+- `X-Path-Id: 12345`
+
+Example response from a backend server showing the extracted headers:
+
+```json
+{
+  "headers": {
+    "Accept": "*/*",
+    "Accept-Encoding": "gzip",
+    "User-Agent": "curl/8.7.1",
+    "X-Forwarded-For": "172.19.0.1",
+    "X-Forwarded-Host": "test.localhost",
+    "X-Forwarded-Port": "80",
+    "X-Forwarded-Proto": "http",
+    "X-Forwarded-Server": "c45947edd753",
+    "X-Path-Category": "electronics",
+    "X-Path-Id": "12345",
+    "X-Real-Ip": "172.19.0.1"
+  },
+  "method": "GET",
+  "path": "/products/electronics/12345",
+  "pathParams": {
+    "Category": "electronics",
+    "Id": "12345"
+  },
+  "queryParams": {}
+}
+```
 
 ## Installation
 
-1. Clone the repository:
-
-```bash
-git clone https://github.com/sistemica/traefik-path-param-headers.git
-cd traefik-path-param-headers
-```
-
-2. Start the development environment:
-
-```bash
-cd dev
-docker-compose up -d
-```
-
-3. Test the plugin:
-
-```bash
-curl -H "Host: test.localhost" http://localhost/products/electronics/12345
-```
-
-You should see a JSON response that includes the extracted path parameters as headers.
-
-## Using in Your Traefik v3 Setup
-
 ### Static Configuration
 
-Add the plugin to your Traefik static configuration:
-
 ```yaml
-# traefik.yml
-plugins:
-  pathparamheaders:
-    moduleName: "github.com/sistemica/traefik-path-param-headers"
-    version: "v1.0.0"
+# Enable experimental features for plugins
+experimental:
+  localPlugins:
+    pathparamheaders:
+      moduleName: github.com/sistemica/traefik-path-param-headers
 ```
 
 ### Dynamic Configuration
 
-Configure the middleware in your dynamic configuration:
-
 ```yaml
-# dynamic-config.yml
 http:
   middlewares:
-    product-params:
+    path-params:
       plugin:
         pathparamheaders:
           pathPattern: "/products/{category}/{id}"
           headerPrefix: "X-Path-"
-```
 
-Apply the middleware to a router:
+  services:
+    backend:
+      loadBalancer:
+        servers:
+          - url: "http://backend:8000"
 
-```yaml
-http:
   routers:
-    products:
-      rule: "Host(`example.com`) && Path(`/products/{category}/{id}`)"
+    test-router:
+      rule: "Host(`test.localhost`) && PathRegexp(`^\\/products\\/([^\\/]+)\\/([^\\/]+)$`)"
+      service: "backend"
       middlewares:
-        - "product-params"
-      service: "product-service"
+        - "path-params"
 ```
+
+Note: The `PathRegexp` router rule uses a regular expression to precisely match the path pattern, ensuring that only valid paths with exactly two path segments after `/products/` are matched.
 
 ## Configuration Options
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `pathPattern` | The URL pattern with parameters in curly braces | (required) |
-| `headerPrefix` | Prefix for the header names | "X-Path-" |
+| Parameter    | Type   | Required | Default | Description                                                         |
+|--------------|--------|----------|---------|---------------------------------------------------------------------|
+| pathPattern  | String | Yes      | -       | URL pattern with parameters in curly braces (e.g., `/{param}/{id}`) |
+| headerPrefix | String | No       | `X-Path-` | Prefix for the header names                                       |
 
-## Examples
+## Development
 
-### Basic Example
+See the [development documentation](dev/README.md) for instructions on setting up a local development environment.
 
-```yaml
-pathPattern: "/products/{category}/{id}"
-```
+## How It Works
 
-When a request is made to `/products/electronics/12345`, the middleware adds:
-- Header `X-Path-Category: electronics`
-- Header `X-Path-Id: 12345`
+The plugin uses regular expressions to extract parameter values from the actual request path based on the pattern provided in the configuration. It then adds these values as headers to the request before passing it to the next middleware or backend service.
 
-### Nested Resources Example
+Parameter names in the pattern are converted to header names with the first letter capitalized (e.g., `category` becomes `X-Path-Category`).
 
-```yaml
-pathPattern: "/api/users/{userId}/posts/{postId}"
-```
+## Notes
 
-When a request is made to `/api/users/john123/posts/987`, the middleware adds:
-- Header `X-Path-UserId: john123`
-- Header `X-Path-PostId: 987`
-
-## Troubleshooting
-
-- If the path doesn't match the pattern, no headers will be added
-- Check Traefik logs for any errors
-- Verify the middleware is correctly attached to your router
-
-For more details, see the [full documentation](README.md).
+- If the request path doesn't match the pattern, no headers will be added
+- The plugin only processes path parameters, not query parameters
+- Parameter names are case-sensitive in the pattern
+- Using `PathRegexp` in the router rule provides precise path matching, but you can also use `PathPrefix` for simpler configurations

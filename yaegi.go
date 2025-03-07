@@ -1,15 +1,16 @@
-// Package pathparamheaders is a Traefik v3 middleware plugin.
-package pathparamheaders
+// Package traefik_path_param_headers is a Traefik v3 middleware plugin.
+package traefik_path_param_headers
 
-// Yaegi is required for Traefik v3 plugins.
-// It exports the plugin constructors.
-var Yaegi = map[string]interface{}{
-	"CreateConfig": CreateConfig,
-	"New":          New,
-}
-
-// Declare exported symbols to avoid dyncheck complaining.
-var (
-	_ = CreateConfig
-	_ = New
+import (
+	"context"
+	"net/http"
 )
+
+// Symbols exposes the plugin constructors for Traefik v3.3.3
+var Symbols = struct {
+	CreateConfig func() *Config
+	New          func(ctx context.Context, next http.Handler, config *Config, name string) (http.Handler, error)
+}{
+	CreateConfig: CreateConfig,
+	New:          New,
+}

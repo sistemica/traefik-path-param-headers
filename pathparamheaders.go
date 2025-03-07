@@ -1,6 +1,6 @@
-// Package pathparamheaders is a Traefik v3 middleware plugin that
+// Package traefik_path_param_headers is a Traefik v3 middleware plugin that
 // extracts path parameters based on a pattern and adds them as HTTP headers.
-package pathparamheaders
+package traefik_path_param_headers
 
 import (
 	"context"
@@ -33,10 +33,11 @@ type PathParamHeaders struct {
 	next         http.Handler
 	pathPattern  string
 	headerPrefix string
+	name         string
 }
 
 // New creates a new PathParamHeaders middleware plugin.
-func New(_ context.Context, next http.Handler, config *Config, _ string) (http.Handler, error) {
+func New(ctx context.Context, next http.Handler, config *Config, name string) (http.Handler, error) {
 	if config.PathPattern == "" {
 		return nil, fmt.Errorf("pathPattern cannot be empty")
 	}
@@ -45,6 +46,7 @@ func New(_ context.Context, next http.Handler, config *Config, _ string) (http.H
 		next:         next,
 		pathPattern:  config.PathPattern,
 		headerPrefix: config.HeaderPrefix,
+		name:         name,
 	}, nil
 }
 
