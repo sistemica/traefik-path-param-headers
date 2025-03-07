@@ -1,0 +1,17 @@
+displayName: Path Parameter Headers
+type: middleware
+import: github.com/sistemica/traefik-path-param-headers
+summary: Extract path parameters and add them as HTTP headers
+description: |
+  This middleware extracts path parameters from the request URL based on a pattern
+  and adds them as HTTP headers to the request.
+  
+  For example, with a pattern "/products/{category}/{id}" and a request to 
+  "/products/electronics/12345", it will add headers X-Path-Category and X-Path-Id.
+  
+iconPath: .assets/icon.png
+bannerPath: .assets/banner.png
+
+testData:
+  pathPattern: /products/{category}/{id}
+  headerPrefix: X-Path-

@@ -1,0 +1,33 @@
+services:
+  traefik:
+    image: traefik:v3.0
+    command:
+      - "--configFile=/etc/traefik/traefik.yml"
+      - "--log.level=DEBUG"
+    ports:
+      - "80:80"
+      - "8080:8080"  # Dashboard
+    volumes:
+      - ./traefik:/etc/traefik
+      - ../../:/plugins-local/src/github.com/yourusername/traefik-path-param-headers  # Mount plugin source
+    depends_on:
+      - backend
+    networks:
+      - traefik-net
+
+  backend:
+    build:
+      context: ./backend
+    container_name: backend
+    networks:
+      - traefik-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`test.localhost`)"
+      - "traefik.http.routers.backend.middlewares=path-params"
+      - "traefik.http.middlewares.path-params.plugin.pathparamheaders.pathPattern=/products/{category}/{id}"
+      - "traefik.http.middlewares.path-params.plugin.pathparamheaders.headerPrefix=X-Path-"
+
+networks:
+  traefik-net:
+    name: traefik-net

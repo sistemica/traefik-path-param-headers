@@ -1,0 +1,24 @@
+## Static configuration for Traefik v3
+log:
+  level: INFO
+
+api:
+  insecure: true
+  dashboard: true
+
+entryPoints:
+  web:
+    address: ":80"
+
+providers:
+  docker:
+    exposedByDefault: false
+    network: traefik-net
+  file:
+    filename: /etc/traefik/dynamic-config.yml
+  plugin:
+    # Plugin local development mode
+    dev:
+      # Path to the plugin source code in the container
+      goPath: /plugins-local
+      moduleName: github.com/yourusername/traefik-path-param-headers
